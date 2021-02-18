@@ -111,12 +111,11 @@ def review_materials(product_urls, driver_path):
     
     df['total_reviews']  = df['stars'].apply(lambda x: add_reviews(x))
     df['avg_rating'] = df['stars'].apply(lambda x: avg_stars(x))
-    
+
     df['material_clean'] = df['material'].apply(lambda x: split_percent(x))
     df['material_clean_list'] = [','.join(map(str, l)) for l in df['material_clean']]
 
-    df['feature_clean'] = df['features'].apply(lambda x: split_percent(x))
-    df['feature_clean_list'] = [','.join(map(str, l)) for l in df['feature_clean']]
+    df['features_list'] = [','.join(map(str, l)) for l in df['features']]
 
     df[['five_stars','four_stars', 'three_stars', 'two_stars', 'one_stars']] = pd.DataFrame(df.stars.tolist(), index= df.index)
 
@@ -212,9 +211,9 @@ def product_url(page_url, driver_path):
 
 def main():
 
-    csv_file = pd.read_csv('/Users/tracynguyen/Documents/GitHub/explore_data/lululemon/resources/lululemon_url.csv')
+    csv_file = pd.read_csv('/Users/tracynguyen/Documents/GitHub/lululemon/resources/lululemon_url.csv')
 
-    csv_filter = csv_file[csv_file['level'] == 1]
+    csv_filter = csv_file[csv_file['type'] == 'leggings']
 
     # page_url_list = [w_bra]
     
@@ -237,7 +236,7 @@ def main():
         dfs.append(merge_df)
 
     final_df = pd.concat(dfs, ignore_index=True)
-    pickle.dump(final_df, open( "20210206_women_all", "wb" ) )
+    pickle.dump(final_df, open( "20210209_women_tmp", "wb" ) )
 
 
 if __name__=="__main__":
