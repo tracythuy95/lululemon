@@ -61,7 +61,9 @@ def review_materials(product_urls, driver_path):
         * for prices, if there is a range, then the lowest value will be returned
 
     '''
-    driver = webdriver.Chrome(driver_path)
+    op = webdriver.ChromeOptions()
+    op.add_argument('headless')
+    driver = webdriver.Chrome(driver_path, options=op)
 
     cols = ['url', 'stars', 'material', 'features']
     lst = []
@@ -81,6 +83,7 @@ def review_materials(product_urls, driver_path):
             i+=1
             if(i==4):
                 features = ['None listed']
+            features = [ x for x in features if ">" not in x ]
         
         i = 0
         while material == []:
@@ -139,7 +142,9 @@ def product_url(page_url, driver_path):
         
         * for prices, if there is a range, then the lowest value will be returned
     '''
-    driver = webdriver.Chrome(driver_path)
+    op = webdriver.ChromeOptions()
+    op.add_argument('headless')
+    driver = webdriver.Chrome(driver_path, options=op)
 
     driver.get(page_url)  # open WMTM page
     i = 0
@@ -157,19 +162,20 @@ def product_url(page_url, driver_path):
             break
 
     try:
-        pickle.dump(driver.page_source , open( "page_source_1", "wb" ) )
-        product_urls = [(i.get_attribute('href')).split("?", 1)[0] for i in driver.find_elements_by_xpath('.//div[@class="product-tile"]//a')]
+        # pickle.dump(driver.page_source , open( "page_source_1", "wb" ) )
+        product_urls = [(i.get_attribute('href')) for i in driver.find_elements_by_xpath('.//a[@class="link product-tile__image-link"]')]
     except AttributeError:
         try:
             time.sleep(15) 
-            pickle.dump(driver.page_source , open( "page_source_2", "wb" ) )
-            product_urls = [(i.get_attribute('href')).split("?", 1)[0] for i in driver.find_elements_by_xpath('.//div[@class="product-tile"]//a')]
+            # pickle.dump(driver.page_source , open( "page_source_2", "wb" ) )
+            product_urls = [(i.get_attribute('href')) for i in driver.find_elements_by_xpath('.//a[@class="link product-tile__image-link"]')]
         except AttributeError: 
             time.sleep(15) 
-            pickle.dump(driver.page_source , open( "page_source_3", "wb" ) )
-            product_urls = [(i.get_attribute('href')).split("?", 1)[0] for i in driver.find_elements_by_xpath('.//div[@class="product-tile"]//a')]
+            # pickle.dump(driver.page_source , open( "page_source_3", "wb" ) )
+            product_urls = [(i.get_attribute('href')) for i in driver.find_elements_by_xpath('.//a[@class="link product-tile__image-link"]')]
 
-    product_urls = list(dict.fromkeys(product_urls))
+    # product_urls = list(dict.fromkeys(product_urls))
+    # print(product_urls)
 
     product_name = [ urllib.parse.unquote(json.loads(i.get_attribute('data-lulu-attributes'))['product']['name']) for i in driver.find_elements_by_xpath('.//h3[@class="product-tile__product-name lll-text-body-1"]//a')]
     price = [i.get_attribute("innerText").replace("\xa0\n", "").replace("\xa0-\xa0", "-") for i in driver.find_elements_by_xpath('.//span[@class="price-1SDQy price"]')]
@@ -213,11 +219,11 @@ def main():
 
     csv_file = pd.read_csv('/Users/tracynguyen/Documents/GitHub/lululemon/resources/lululemon_url.csv')
 
-    csv_filter = csv_file[csv_file['type'] == 'leggings']
+    # csv_filter = csv_file[csv_file['type'] == 'leggings']
 
     # page_url_list = [w_bra]
     
-    page_url_list = list(csv_filter['url'])
+    page_url_list = list(csv_file['url'])
 
     driver_path = '/Users/tracynguyen/Applications/chromedriver'
 
@@ -236,7 +242,7 @@ def main():
         dfs.append(merge_df)
 
     final_df = pd.concat(dfs, ignore_index=True)
-    pickle.dump(final_df, open( "20210209_women_tmp", "wb" ) )
+    pickle.dump(final_df, open( "20210225_all", "wb" ) )
 
 
 if __name__=="__main__":
